@@ -84,6 +84,22 @@ python -m sherlock.graph              # analysis_output/福尔摩斯线索墙.ht
 `python -m sherlock.collect <sec_uid> --profile browser_data_me --visible`
 （用新 profile 走一遍扫码，互不影响既有会话）。
 
+## 📸 界面预览
+
+> 以下截图来自内置演示数据（虚构账号「林小满」），运行 `python sherlock.py demo` 即可重现。
+
+**案件板**（五步推理链案卷）
+
+![](docs/screenshots/board.jpg)
+
+**关系线索墙**（G6 力导向图，节点可点击跳转对话）
+
+![](docs/screenshots/graph.jpg)
+
+**情报整理**（对话线程 + 按人筛选）
+
+![](docs/screenshots/dossier.jpg)
+
 ## 🎬 30 秒演示（无需登录）
 
 ```bash
