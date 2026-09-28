@@ -1,0 +1,25 @@
+# 本地数据与隐私(严禁入库)
+crawled_comments/
+analysis_output/
+browser_data*/
+data/
+*.csv
+*.json
+.env
+*.pem
+pw_*
+# Python
+__pycache__/
+.venv/
+*.pyc
+.DS_Store
+# 配置示例例外(模板必须入库)
+!config.example.json
+!demo_cases.json
+
+# 本地排除名单(含真实 sec_uid, 不入库)
+排除名单.txt
+config.json
+
+# 演示数据集(虚构, 必须入库)
+!demo_data.json

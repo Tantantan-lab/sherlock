@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>贝克街案件分析室</title>
+  <meta name="description" content="福尔摩斯风格的交互式线索分析板。">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23141210'/%3E%3Ccircle cx='27' cy='26' r='14' fill='none' stroke='%23d6b36a' stroke-width='5'/%3E%3Cpath d='M38 37l15 15' stroke='%23d6b36a' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <style>
+    :root{--ink:#171411;--paper:#e9dfc7;--paper-2:#d9c9a6;--gold:#c7a45e;--red:#8e2d28;--red-bright:#c94b40;--green:#49664a;--blue:#355f73;--board:#765239;--board-dark:#432e20;--cream:#f2ead9;--muted:#9e927f;--shadow:0 16px 42px rgba(8,5,3,.34)}
+    *{box-sizing:border-box}
+    html{min-width:320px;background:#100e0c}
+    body{margin:0;color:var(--cream);font-family:Georgia,'Songti SC','Noto Serif SC',serif;background:radial-gradient(circle at 50% -15%,#35291f 0,#181411 48%,#0d0b09 100%);min-height:100vh;overflow-x:hidden}
+    button,input,textarea{font:inherit}
+    button{cursor:pointer}
+    button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #e7c875;outline-offset:3px}
+    .shell{min-height:100vh;display:grid;grid-template-rows:auto 1fr}
+    header{min-height:76px;padding:14px 28px;border-bottom:1px solid rgba(220,195,143,.22);display:flex;align-items:center;justify-content:space-between;gap:20px;background:rgba(16,14,12,.8);backdrop-filter:blur(18px);position:relative;z-index:20}
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}.monogram{width:42px;height:42px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font-size:20px;box-shadow:inset 0 0 0 4px #181410}.brand h1{font-size:18px;letter-spacing:.17em;margin:0;font-weight:500;white-space:nowrap}.brand p{margin:4px 0 0;color:#8f816d;font:10px/1.2 Arial,sans-serif;letter-spacing:.24em}
+    .case-meta{display:flex;align-items:center;gap:22px;font:12px Arial,sans-serif;color:#c0b39d}.status{display:flex;align-items:center;gap:8px}.status i{width:7px;height:7px;background:#b54038;border-radius:50%;box-shadow:0 0 0 5px rgba(181,64,56,.12);animation:pulse 2.2s infinite}.case-id{border-left:1px solid #4d4034;padding-left:22px;letter-spacing:.12em}.header-btn{border:1px solid #65533f;background:#211b16;color:#d7c7aa;border-radius:3px;padding:10px 14px;font-size:12px;letter-spacing:.08em}.header-btn:hover{border-color:var(--gold);color:#f2d99e}
+    .workspace{display:grid;grid-template-columns:260px minmax(520px,1fr) 290px;min-height:calc(100vh - 77px)}
+    aside{background:rgba(20,17,14,.75);padding:24px 19px;position:relative;z-index:10}.left{border-right:1px solid #3b3027}.right{border-left:1px solid #3b3027}.section-label{font:10px Arial,sans-serif;letter-spacing:.22em;color:var(--gold);display:flex;align-items:center;gap:10px;margin:0 0 14px}.section-label:after{content:"";height:1px;background:#4b3d30;flex:1}.case-title{font-size:25px;line-height:1.2;font-weight:500;margin:0 0 8px}.location{color:#8d806e;font-size:12px;margin:0 0 22px}.case-desc{font-size:13px;line-height:1.7;color:#b5a995;margin-bottom:24px}.progress-head{display:flex;justify-content:space-between;font:11px Arial,sans-serif;color:#9a8c79;margin-bottom:8px}.progress{height:4px;background:#302820;overflow:hidden}.progress span{display:block;width:68%;height:100%;background:linear-gradient(90deg,#7f2925,#c15548)}
+    .filter-title{margin:27px 0 11px;font:10px Arial,sans-serif;color:#7e7262;letter-spacing:.18em}.filters{display:grid;gap:8px}.filter{width:100%;display:flex;align-items:center;justify-content:space-between;border:0;background:transparent;color:#bfb29c;padding:9px 6px;text-align:left;font-size:13px;border-bottom:1px solid #2f2821}.filter.active{color:#f1d493}.filter .dot{width:8px;height:8px;border-radius:50%;margin-right:10px;display:inline-block}.filter b{font:10px Arial,sans-serif;color:#716656;font-weight:400}.legend{margin-top:28px;padding:14px;border:1px solid #342c24;background:#17130f}.legend p{margin:7px 0;font:11px Arial,sans-serif;color:#897d6c}.legend span{display:inline-block;width:24px;height:2px;margin-right:8px;vertical-align:middle}.board-wrap{position:relative;padding:26px;overflow:hidden;background:linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:28px 28px}
+    .board-toolbar{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:9;background:rgba(20,16,13,.92);border:1px solid #574534;padding:6px;display:flex;gap:5px;box-shadow:0 6px 20px #120d09}.tool{border:0;background:transparent;color:#9f927f;width:35px;height:31px;border-radius:2px;font:15px Arial}.tool:hover,.tool.active{background:#493929;color:#f1d28f}.zoom{width:auto;padding:0 10px;font-size:11px}
+    .board{height:calc(100vh - 129px);min-height:620px;max-height:880px;position:relative;overflow:hidden;border:12px solid var(--board-dark);box-shadow:inset 0 0 0 2px #967055,inset 0 0 80px rgba(34,17,7,.38),var(--shadow);background-color:var(--board);background-image:radial-gradient(rgba(244,220,173,.11) 1px,transparent 1px),radial-gradient(rgba(43,25,15,.13) 1px,transparent 1px),linear-gradient(135deg,rgba(255,255,255,.03),rgba(0,0,0,.08));background-size:7px 7px,11px 11px,100% 100%}
+    #threads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}.thread{stroke:#a8322d;stroke-width:2;filter:drop-shadow(0 1px 1px #28130f);opacity:.86}.thread.weak{stroke-dasharray:6 5;opacity:.58}.thread-dot{fill:#b13b33;stroke:#6e211d;stroke-width:2}
+    .clue{position:absolute;width:178px;color:#251f18;background:var(--paper);padding:15px 15px 13px;box-shadow:0 7px 14px rgba(28,16,8,.36);z-index:4;cursor:grab;user-select:none;transform:rotate(var(--r));transition:box-shadow .18s,filter .18s,opacity .2s}.clue:active{cursor:grabbing;box-shadow:0 18px 30px rgba(20,11,5,.5)}.clue.hidden{opacity:.12;filter:grayscale(1);pointer-events:none}.clue.selected{box-shadow:0 0 0 3px #d8b357,0 14px 26px rgba(24,12,5,.45);z-index:6}.clue:before{content:"";position:absolute;left:50%;top:5px;width:9px;height:9px;background:#a63730;border-radius:50%;transform:translateX(-50%);box-shadow:0 2px 2px #5a1b18,0 0 0 2px rgba(255,255,255,.16)}.clue.photo{padding:11px;background:#ddd2ba}.clue.photo .scene{height:92px;border:5px solid #efe7d5;background:linear-gradient(145deg,#1e2422,#53605a 45%,#181d1c);display:grid;place-items:center;color:#b6b7ac;font-size:34px;filter:sepia(.35)}.clue.photo .caption{text-align:center;margin-top:9px;font:italic 12px Georgia}.tape{position:absolute;left:50%;top:-8px;width:58px;height:18px;transform:translateX(-50%) rotate(-3deg);background:rgba(220,205,161,.65);box-shadow:0 1px 2px rgba(38,30,14,.15)}.clue-tag{display:flex;justify-content:space-between;align-items:center;color:#695d4e;font:9px Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;margin:3px 0 11px}.clue h3{font-size:16px;margin:0 0 7px;font-weight:600}.clue p{font-size:11px;line-height:1.48;margin:0;color:#574d40}.clue .mark{position:absolute;right:8px;bottom:6px;font:bold 22px/1 Arial;color:rgba(132,39,34,.34);transform:rotate(-10deg)}
+    .clue.note{background:#d8c78f}.clue.note p{font-family:'Kaiti SC',Georgia,serif;font-size:13px}.clue.dark{background:#282723;color:#ded3b9;border:1px solid #897354}.clue.dark p{color:#bcb096}.clue.dark .clue-tag{color:#94866f}.clue.evidence:after{content:"EVIDENCE";position:absolute;right:8px;bottom:6px;border:2px solid rgba(123,35,31,.45);color:rgba(123,35,31,.55);padding:2px 4px;font:bold 8px Arial;transform:rotate(-8deg)}
+    .clue-a{left:8%;top:8%;--r:-3deg}.clue-b{left:40%;top:4%;--r:2deg}.clue-c{right:7%;top:11%;--r:-1deg}.clue-d{left:14%;top:43%;--r:2deg}.clue-e{left:45%;top:39%;--r:-2deg}.clue-f{right:7%;top:47%;--r:3deg}.clue-g{left:31%;bottom:6%;--r:1deg}.clue-h{right:24%;bottom:5%;--r:-3deg}
+    .analysis-tabs{display:flex;border-bottom:1px solid #3b3027;margin:-2px 0 20px}.tab{flex:1;border:0;background:none;color:#776b5d;padding:10px 3px;font:11px Arial,sans-serif;letter-spacing:.08em;border-bottom:2px solid transparent}.tab.active{color:#e1c27b;border-color:#ad853d}.panel{display:none}.panel.active{display:block}.suspect{padding:15px 0;border-bottom:1px solid #302821}.suspect-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.suspect h3{font-size:15px;font-weight:500;margin:0}.risk{font:9px Arial,sans-serif;padding:4px 6px;border:1px solid}.risk.high{color:#d96a5f;border-color:#66342f}.risk.mid{color:#d3b66d;border-color:#5c4e31}.risk.low{color:#77977b;border-color:#354939}.suspect p{color:#8f8372;font-size:11px;line-height:1.5;margin:8px 0}.motive{font:10px Arial,sans-serif;color:#b6a991}.motive b{color:#716657;font-weight:400}.confidence{display:flex;gap:3px;margin-top:10px}.confidence i{width:18px;height:3px;background:#3b3128}.confidence i.on{background:#a83b34}.hypothesis{padding:15px;border:1px solid #483a2d;background:#181410;margin-bottom:12px}.hypothesis strong{display:block;color:#d7bd82;font-size:13px;margin-bottom:7px}.hypothesis p{font-size:11px;line-height:1.6;color:#8f8371;margin:0}.notes{width:100%;height:215px;resize:vertical;background:#181410;border:1px solid #493b2e;color:#cfbea0;padding:12px;font-size:13px;line-height:1.6}.save-state{height:16px;margin:8px 0 0;color:#6e8e71;font:10px Arial,sans-serif}.deduce{width:100%;margin-top:20px;border:1px solid #97763e;background:linear-gradient(#3f3020,#2b2118);color:#e8ce95;padding:13px;font-size:12px;letter-spacing:.13em}.deduce:hover{background:#4b3925}.result{display:none;margin-top:12px;padding:13px;background:#211914;border-left:2px solid var(--red-bright);font-size:11px;line-height:1.6;color:#bdae97}.result.show{display:block;animation:reveal .45s ease-out}
+    .mobile-panel-btn{display:none}
+    @keyframes pulse{50%{box-shadow:0 0 0 8px rgba(181,64,56,0)}}@keyframes reveal{from{opacity:0;transform:translateY(6px)}}
+    @media(max-width:1080px){.workspace{grid-template-columns:220px minmax(500px,1fr)}.right{position:fixed;right:0;top:77px;bottom:0;width:290px;z-index:30;transform:translateX(100%);transition:transform .25s;box-shadow:-18px 0 40px #0c0907}.right.open{transform:translateX(0)}.mobile-panel-btn{display:inline-block}.clue{width:160px}.case-meta .status{display:none}}
+    @media(max-width:760px){header{padding:12px 16px}.brand h1{font-size:15px}.brand p,.case-id{display:none}.workspace{display:block}.left{display:none}.board-wrap{padding:14px}.board{height:calc(100svh - 110px);min-height:600px;border-width:8px}.board-toolbar{top:8px}.clue{width:142px;padding:13px 11px}.clue p{font-size:10px}.clue h3{font-size:14px}.clue-a{left:3%;top:8%}.clue-b{left:38%;top:4%}.clue-c{right:3%;top:29%}.clue-d{left:4%;top:38%}.clue-e{left:36%;top:39%}.clue-f{right:3%;top:56%}.clue-g{left:5%;bottom:5%}.clue-h{right:16%;bottom:4%}.right{top:67px}.header-btn{padding:9px}.monogram{width:38px;height:38px}.board-wrap{overflow:auto}.board{min-width:560px}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand"><div class="monogram">B</div><div><h1>贝克街案件分析室</h1><p>BAKER STREET · PRIVATE ARCHIVE</p></div></div>
+    <div class="case-meta"><div class="status"><i></i><span>案件调查中</span></div><div class="case-id">案卷编号 221B–07</div><button class="header-btn mobile-panel-btn" id="openAnalysis">分析</button><button class="header-btn" id="resetBoard">重置线索板</button></div>
+  </header>
+  <main class="workspace">
+    <aside class="left">
+      <p class="section-label">当前案件</p><h2 class="case-title">蓝宝石<br>失窃之谜</h2><p class="location">伦敦 · 摄政街 · 1891年12月</p>
+      <p class="case-desc">博物馆闭馆后，“马扎林之星”从上锁的展柜中消失。现场没有暴力闯入痕迹，但壁炉灰烬里发现了异常纤维。</p>
+      <div class="progress-head"><span>调查完整度</span><b>68%</b></div><div class="progress"><span></span></div>
+      <p class="filter-title">线索分类</p>
+      <div class="filters">
+        <button class="filter active" data-filter="all"><span><i class="dot" style="background:#b9a986"></i>全部线索</span><b>08</b></button>
+        <button class="filter" data-filter="physical"><span><i class="dot" style="background:#9e473f"></i>物证</span><b>03</b></button>
+        <button class="filter" data-filter="testimony"><span><i class="dot" style="background:#c4aa60"></i>证词</span><b>02</b></button>
+        <button class="filter" data-filter="person"><span><i class="dot" style="background:#476d76"></i>人物</span><b>03</b></button>
+      </div>
+      <div class="legend"><p><span style="background:#a8322d"></span>强关联 / 可证实</p><p><span style="background:repeating-linear-gradient(90deg,#a8322d 0 5px,transparent 5px 9px)"></span>推测关联 / 待验证</p></div>
+    </aside>
+    <section class="board-wrap" aria-label="可拖拽线索分析板">
+      <div class="board-toolbar"><button class="tool active" title="移动线索" aria-label="移动线索">✥</button><button class="tool" id="toggleLines" title="显示或隐藏关系线" aria-label="显示或隐藏关系线">⌁</button><button class="tool zoom" id="arrangeBoard">自动整理</button></div>
+      <div class="board" id="board">
+        <svg id="threads" aria-hidden="true"></svg>
+        <article class="clue clue-a photo" data-id="window" data-type="physical" tabindex="0"><span class="tape"></span><div class="scene">窗</div><div class="caption">东侧气窗 · 无破损</div></article>
+        <article class="clue clue-b evidence" data-id="fiber" data-type="physical" tabindex="0"><div class="clue-tag"><span>物证 01</span><span>已采样</span></div><h3>深蓝色纤维</h3><p>发现于壁炉灰烬中。羊毛材质，带微量煤焦油。</p></article>
+        <article class="clue clue-c dark" data-id="guard" data-type="person" tabindex="0"><div class="clue-tag"><span>人物 01</span><span>门卫</span></div><h3>阿尔伯特 · 芬奇</h3><p>声称 22:10 巡查西翼，未听见任何异常声响。</p><span class="mark">?</span></article>
+        <article class="clue clue-d note" data-id="testimony" data-type="testimony" tabindex="0"><div class="clue-tag"><span>证词 01</span><span>女佣</span></div><p>“九点过后，我看见馆长从侧门出去。他穿着那件深蓝色大衣。”</p></article>
+        <article class="clue clue-e photo" data-id="clock" data-type="physical" tabindex="0"><span class="tape"></span><div class="scene">Ⅸ</div><div class="caption">停在 9:17 的怀表</div></article>
+        <article class="clue clue-f dark" data-id="curator" data-type="person" tabindex="0"><div class="clue-tag"><span>人物 02</span><span>馆长</span></div><h3>埃德蒙 · 克劳利</h3><p>掌握展柜唯一钥匙。近期有巨额赌债，否认离馆。</p><span class="mark">!</span></article>
+        <article class="clue clue-g note" data-id="letter" data-type="testimony" tabindex="0"><div class="clue-tag"><span>文件 01</span><span>匿名信</span></div><p>“星辰会在钟声第九次响起时易主。别相信看守时间的人。”</p></article>
+        <article class="clue clue-h" data-id="collector" data-type="person" tabindex="0"><div class="clue-tag"><span>人物 03</span><span>收藏家</span></div><h3>维克多 · 哈罗</h3><p>曾三次求购宝石被拒。当晚马车停在两个街区外。</p></article>
+      </div>
+    </section>
+    <aside class="right" id="analysisPanel">
+      <p class="section-label">推理分析</p>
+      <div class="analysis-tabs"><button class="tab active" data-panel="suspects">嫌疑人</button><button class="tab" data-panel="hypotheses">假设</button><button class="tab" data-panel="notes">笔记</button></div>
+      <div class="panel active" id="suspects">
+        <div class="suspect"><div class="suspect-head"><h3>埃德蒙 · 克劳利</h3><span class="risk high">高度嫌疑</span></div><p>钥匙、债务与虚假不在场证明形成闭环。</p><div class="motive"><b>动机</b> · 偿还赌债</div><div class="confidence"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div></div>
+        <div class="suspect"><div class="suspect-head"><h3>阿尔伯特 · 芬奇</h3><span class="risk mid">需要核实</span></div><p>巡逻记录存在七分钟空档，但暂时缺乏直接物证。</p><div class="motive"><b>动机</b> · 未知</div><div class="confidence"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div></div>
+        <div class="suspect"><div class="suspect-head"><h3>维克多 · 哈罗</h3><span class="risk low">间接关联</span></div><p>有购买意图，尚不能证明进入过博物馆。</p><div class="motive"><b>动机</b> · 私人收藏</div><div class="confidence"><i class="on"></i><i></i><i></i><i></i><i></i></div></div>
+      </div>
+      <div class="panel" id="hypotheses"><div class="hypothesis"><strong>假设 A · 内部盗窃</strong><p>馆长使用钥匙取走宝石，并利用门卫巡逻空档离开。纤维与女佣证词均支持此推断。</p></div><div class="hypothesis"><strong>假设 B · 时间误导</strong><p>怀表被故意停在 9:17，使调查者误判盗窃发生时间。匿名信可能来自知情者。</p></div><div class="hypothesis"><strong>待验证</strong><p>核对蓝色纤维与馆长外套；检查怀表机芯是否人为卡住。</p></div></div>
+      <div class="panel" id="notes"><textarea class="notes" id="caseNotes" placeholder="记录你的推理……"></textarea><p class="save-state" id="saveState">笔记自动保存在本机</p></div>
+      <button class="deduce" id="deduce">形成最终推论</button><div class="result" id="result">最可能的作案者是馆长克劳利。他利用唯一钥匙取走宝石，焚烧外套纤维以毁灭痕迹，并借怀表制造错误时间线。仍需用纤维比对作为决定性证据。</div>
+    </aside>
+  </main>
+</div>
+<script>
+  const board=document.getElementById('board');
+  const svg=document.getElementById('threads');
+  const clues=[...document.querySelectorAll('.clue')];
+  const links=[['fiber','curator',0],['fiber','testimony',0],['testimony','curator',0],['clock','guard',1],['clock','letter',1],['letter','collector',1],['window','guard',1],['collector','curator',1]];
+  let drag=null,offsetX=0,offsetY=0,linesVisible=true;
+  const posKey='baker-street-board-v1';
+  function center(el){const b=board.getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-b.left+r.width/2,y:r.top-b.top+r.height/2}}
+  function draw(){svg.innerHTML='';for(const [a,b,weak] of links){const x=document.querySelector(`[data-id="${a}"]`),y=document.querySelector(`[data-id="${b}"]`);if(!x||!y||x.classList.contains('hidden')||y.classList.contains('hidden')||!linesVisible)continue;const p=center(x),q=center(y);svg.insertAdjacentHTML('beforeend',`<line class="thread ${weak?'weak':''}" x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}"/><circle class="thread-dot" cx="${p.x}" cy="${p.y}" r="3.5"/><circle class="thread-dot" cx="${q.x}" cy="${q.y}" r="3.5"/>`)} }
+  function save(){const data={};clues.forEach(c=>data[c.dataset.id]={left:c.style.left,top:c.style.top});localStorage.setItem(posKey,JSON.stringify(data))}
+  function restore(){try{const data=JSON.parse(localStorage.getItem(posKey)||'{}');clues.forEach(c=>{if(data[c.dataset.id]){c.style.left=data[c.dataset.id].left;c.style.top=data[c.dataset.id].top;c.style.right='auto';c.style.bottom='auto'}})}catch{}requestAnimationFrame(draw)}
+  function start(e){const c=e.target.closest('.clue');if(!c)return;drag=c;c.classList.add('selected');const r=c.getBoundingClientRect();offsetX=(e.clientX??e.touches?.[0].clientX)-r.left;offsetY=(e.clientY??e.touches?.[0].clientY)-r.top;c.setPointerCapture?.(e.pointerId)}
+  function move(e){if(!drag)return;const b=board.getBoundingClientRect();let x=e.clientX-b.left-offsetX,y=e.clientY-b.top-offsetY;x=Math.max(0,Math.min(b.width-drag.offsetWidth,x));y=Math.max(0,Math.min(b.height-drag.offsetHeight,y));drag.style.left=x+'px';drag.style.top=y+'px';drag.style.right='auto';drag.style.bottom='auto';draw()}
+  function end(){if(!drag)return;drag.classList.remove('selected');drag=null;save()}
+  board.addEventListener('pointerdown',start);board.addEventListener('pointermove',move);board.addEventListener('pointerup',end);board.addEventListener('pointercancel',end);
+  document.querySelectorAll('.filter').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));btn.classList.add('active');const f=btn.dataset.filter;clues.forEach(c=>c.classList.toggle('hidden',f!=='all'&&c.dataset.type!==f));draw()}));
+  document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{document.querySelectorAll('.tab,.panel').forEach(x=>x.classList.remove('active'));tab.classList.add('active');document.getElementById(tab.dataset.panel).classList.add('active')}));
+  document.getElementById('toggleLines').addEventListener('click',e=>{linesVisible=!linesVisible;e.currentTarget.classList.toggle('active',linesVisible);draw()});
+  document.getElementById('deduce').addEventListener('click',()=>document.getElementById('result').classList.toggle('show'));
+  const notes=document.getElementById('caseNotes');notes.value=localStorage.getItem('baker-notes')||'';notes.addEventListener('input',()=>{localStorage.setItem('baker-notes',notes.value);const s=document.getElementById('saveState');s.textContent='已保存';clearTimeout(notes.timer);notes.timer=setTimeout(()=>s.textContent='笔记自动保存在本机',1200)});
+  document.getElementById('openAnalysis').addEventListener('click',()=>document.getElementById('analysisPanel').classList.toggle('open'));
+  document.addEventListener('click',e=>{if(innerWidth<=1080&&!e.target.closest('#analysisPanel')&&!e.target.closest('#openAnalysis'))document.getElementById('analysisPanel').classList.remove('open')});
+  function arrange(){clues.forEach(c=>{c.style.left='';c.style.top='';c.style.right='';c.style.bottom=''});localStorage.removeItem(posKey);setTimeout(draw,30)}
+  document.getElementById('arrangeBoard').addEventListener('click',arrange);
+  document.getElementById('resetBoard').addEventListener('click',()=>{arrange();notes.value='';localStorage.removeItem('baker-notes');document.getElementById('result').classList.remove('show')});
+  addEventListener('resize',draw);restore();
+</script>
+</body>
+</html>

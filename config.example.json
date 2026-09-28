@@ -1,0 +1,4 @@
+{
+  "target_sec_uid": "目标账号的sec_uid(从抖音个人主页URL中提取,形如 MS4wLjABAAAA...)",
+  "exclude_uids": ["分析中需要排除的sec_uid,可为空"]
+}
